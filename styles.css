@@ -6,6 +6,7 @@
 }
 
 .popup {
+    all: initial; /* resetting styles */
     position: fixed;
     top: 50px;
     left: 50px;
@@ -35,22 +36,58 @@
     color: white;
     text-wrap-mode: wrap;
     border-bottom: none;
+    display: flex;
+    align-items: center;
 }
 
 .type {
     font-size: 14px;
     font-weight: normal;
+    border: 2px solid purple;
+    background-color: purple;
+    border-radius: 5px;
+    padding: 2px;
+    margin-left: 10px;
 }
 
 .definitions {
     font-size: 14px;
 }
 
+.def-list {
+    background-color: rgb(29, 22, 22);
+    padding: 10px;
+    border-left: 2px solid;
+    border-radius: 15px;
+    margin: 0 auto;
+    padding-left: 30px;
+}
+
 .synonym {
     font-weight: normal;
     font-size: 80%;
+    color: white;
+    display: inline;
+    margin-top: 5px;
+}
+
+.syn-title {
+    color: rgb(104, 104, 104);
+    font-size: 15px;
 }
 
 .visible {
     display: none;
+}
+
+.extra-def-btn {
+    list-style-type: none;
+}
+
+.extra-def-btn::before {
+    
+    background-color: rgb(43, 43, 43);
+    color: white;
+    margin-right: 10px; /* Space between arrow and text */
+
 }

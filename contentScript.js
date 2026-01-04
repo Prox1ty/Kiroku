@@ -12,7 +12,7 @@ document.addEventListener("click", (event) => {
     try {
         if (popup) {
             if (event.target !== popup || !popup.contains(event.target)) {
-                console.log(event.target)
+                console.log(event.target) // debugging purposes, checking what this prints for different elements
                 document.body.removeChild(popup);
                 popup = null;
             }
@@ -31,7 +31,7 @@ const createPopup = (content) => {
     popup.innerHTML = content
 
     popup.addEventListener("click", (event) => {
-        event.stopPropagation();
+        event.stopPropagation(); // prevent popup from closing by clicking inside the popup window
     });
 
     const extraDefButton = popup.querySelector(".extra-def-btn");
@@ -41,11 +41,13 @@ const createPopup = (content) => {
             const extraDefList = popup.querySelector(".extra-def-ul");
             if (extraDefList) {
                 extraDefList.classList.toggle("visible");
+                extraDefButton.innerText = extraDefList.classList.contains("visible") ? "▶ Show Extra" : "▼ Hide Extra";
             }
         })
     }
 
     document.body.appendChild(popup);
+    postionPopup(popup);
     console.log("pop!")
 }
 
@@ -64,7 +66,8 @@ const removePopup = () => {
 // Listen for key press on the entire window
 let keyActive = false;
 let content = "";
-let lastWord;
+let lastWord = "";
+let wordFound = false;
 
 window.addEventListener('keydown', async (event) => {
     if (event.ctrlKey || event.metaKey && !keyActive) {
@@ -73,8 +76,8 @@ window.addEventListener('keydown', async (event) => {
         let selectedText = window.getSelection().toString().toLowerCase().trim();
         
         // Handling Re-lookups
-        if (lastWord == selectedText) {
-            triggerPopupWithoutRefreshing(content)
+        if (lastWord == selectedText && wordFound) {
+            triggerPopupWithoutRefreshing(content);
         } else {
             lastWord = selectedText;
             await triggerPopup(selectedText);
@@ -117,73 +120,123 @@ async function getDefinition(selectedWord) {
 
 async function triggerPopup(selectedText) {
     content = "";
-        const dict = await getDefinition(selectedText);
+        const dict = await getDefinition(selectedText); 
         if (dict.length === 0) {
+            wordFound = false;
             return;
+        } else {
+            wordFound = true;
         }
         for (let entry of dict) {
-            let defs = entry.definition;
+
+            let synHtml = entry.synonym.map(s => `<span class="synonym">${s}</span>`).join("");
+            let defHtml = entry.definition.map((d, i) => {
+                const sentence = entry.sentence[i] ? `<span class="sentence">${entry.sentence[i]}</span>` : "";
+                return `<li class="def-item">${d}${sentence}</li>`
+            }).join("");    
+
+            // let defs = entry.definition;
             // formatting definitions
-            let printableDef = "";
+            // let printableDef = "";
 
-            for (let def of defs) {
-                printableDef += `<li class="def">${def}</li><br>`;
-            }
+            // for (let def of defs) {
+            //     printableDef += `<li class="def">${def}</li><br>`;
+            // }
 
-            let sentences = entry.sentence;
-            // formatting sentences
-            let printableSentences = "";
-            if (!(typeof(sentences) === 'string')) {
-                for (let sentence of sentences) {
-                    printableSentences += `<li class="sentence">"${sentence}"</li><br>`;
-                }
-            } else {
-                printableSentences += 'No sentences available';
-            }
+            // let sentences = entry.sentence;
+            // // formatting sentences
+            // let printableSentences = "";
+            // if (!(typeof(sentences) === 'string')) {
+            //     for (let sentence of sentences) {
+            //         printableSentences += `<li class="sentence">"${sentence}"</li><br>`;
+            //     }
+            // } else {
+            //     printableSentences += 'No sentences available';
+            // }
 
             let type = entry.type;
 
             // formatting synonyms
-            let synonyms = entry.synonym;
-            let printableSynonyms = "";
-            if (synonyms.length > 0) {
-                let cnt = 0;
-                for (syn of synonyms) {
-                    printableSynonyms += `<h3 class="synonym">${synonyms}</h3>\t`;
-                }
-            }
+            // let synonyms = entry.synonym;
+            // let printableSynonyms = "";
+            // if (synonyms.length > 0) {
+            //     let cnt = 0;
+            //     for (syn of synonyms) {
+            //         printableSynonyms += `<h3 class="synonym">${syn} </h3>`;
+            //     }
+            // }
 
             content += `
-                    <div class="wrapper">
-                        <div class="main">
-                            <h2 class="word">${selectedText} - <span class="type">${type}</span></h2>
-                            ${printableSynonyms}
-                        </div>
-                        <div class="definitions">
-                            <ul class="def-list">
-                                <button class="extra-def-btn"><span = "extra-def-span">Extra Definitions</span></button>
-                                <br>
-                                <ul class="extra-def-ul visible">
-                                    <!--space for extra defs-->
-                                </ul>
-                                ${printableDef}
-                                ${printableSentences}
-                                
-                            </ul>
-                        </div>
+                <div class="wrapper">
+                    <div class="word-header">
+                        <span class="word">${selectedText}</span>
+                        <span class="type">${type}</span>
                     </div>
-                `;
+                    <div class="syn-container">${synHtml}</div>
+                    <ul class="def-list">${defHtml}</ul>
+                    <div class="extra-def-btn">▶ Extra Definitions</div>
+                    <ul class="extra-def-ul visible>
+                    </ul>
+                </div>
+            `;
 
-            if (defs.length > 0) {
-                createPopup(content);
-            } else {
-                console.log(`No match found for ${selectedText}`);
-            }
-            console.log(`Extracted Text: ${selectedText}`);
+            // content += `
+            //         <div class="wrapper">
+            //             <div class="main">
+            //                 <h2 class="word">${selectedText} - <span class="type">${type}</span></h2>
+            //                 <p class="syn-title"><i>Synonyms</i></p> ${printableSynonyms}
+                            
+            //             </div>
+            //             <div class="definitions">
+            //                 <ul class="def-list">
+            //                 ${printableDef}
+            //                 ${printableSentences}
+                            
+            //                 </ul>
+            //                 <li class="extra-def-btn"><span = "extra-def-span">▶ Show Extra</span></li>
+            //                 <br>
+            //                 <ul class="extra-def-ul visible">
+            //                     <ul class="def-list">
+            //                         <!--space for extra defs-->
+            //                     </ul>
+            //                 </ul>
+            //             </div>
+            //         </div>
+            //     `;
+
+            createPopup(content);
+            // will decide if i want to un-comment this
+            // if (defs.length > 0) {
+            // } else {
+            //     console.log(`No match found for ${selectedText}`);
+            // }
+            // console.log(`Extracted Text: ${selectedText}`);
 
         } 
 }
 
 function triggerPopupWithoutRefreshing() {
     createPopup(content);
+}
+
+function positionPopup(popupElement) {
+    const selection = window.getSelection();    
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+
+        // 10 pixels below the selected text
+        let top = rect.bottom + window.scrollY + 10; // accounting for scroll positions as well
+        let left = rect.left + window.scrollX;  
+
+        // ask gemini about this in a bit
+        if (left + 350 > window.innerWidth) // popup width is 350px
+        {
+            left = window.innerWidth - 370;
+        } 
+
+        popupElement.style.top = `${top}px`;
+        popupElement.style.left = `${left}px`;
+
+    }
 }
