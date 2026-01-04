@@ -3,18 +3,30 @@
     "name": "Text Extractor on Key Press",
     "version": "1.0",
     "description": "Extract text content when 'Ctrl' key is pressed.",
-    "permissions": ["activeTab", "scripting"],
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "unlimitedStorage"],
     "content_scripts" : [
         {
             "matches": ["<all_urls>"],
-            "js": ["contentScript.js"],
+            "js": ["browser-polyfill.js", "contentScript.js"],
             "css": ["styles.css"]
         }
     ],
     "web_accessible_resources": [
         {
-            "resources": ["dict/data.noun", "dict/data.verb", "dict/data.adj", "dict/data.adv", "english.json"],
+            "resources": ["dict/data.noun",
+            "dict/data.verb",
+            "dict/data.adj", 
+            "dict/data.adv", 
+            "english.json"],
             "matches": ["<all_urls>"]
         }
-    ]
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }
+    
 }

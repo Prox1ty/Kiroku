@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "dexie": "^4.2.1"
+  },
+  "devDependencies": {
+    "webextension-polyfill": "^0.12.0"
+  }
+}
