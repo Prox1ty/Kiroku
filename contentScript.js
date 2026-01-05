@@ -46,8 +46,8 @@ const createPopup = (content) => {
         })
     }
 
+    positionPopup(popup);
     document.body.appendChild(popup);
-    postionPopup(popup);
     console.log("pop!")
 }
 
@@ -68,6 +68,7 @@ let keyActive = false;
 let content = "";
 let lastWord = "";
 let wordFound = false;
+
 
 window.addEventListener('keydown', async (event) => {
     if (event.ctrlKey || event.metaKey && !keyActive) {
@@ -135,36 +136,7 @@ async function triggerPopup(selectedText) {
                 return `<li class="def-item">${d}${sentence}</li>`
             }).join("");    
 
-            // let defs = entry.definition;
-            // formatting definitions
-            // let printableDef = "";
-
-            // for (let def of defs) {
-            //     printableDef += `<li class="def">${def}</li><br>`;
-            // }
-
-            // let sentences = entry.sentence;
-            // // formatting sentences
-            // let printableSentences = "";
-            // if (!(typeof(sentences) === 'string')) {
-            //     for (let sentence of sentences) {
-            //         printableSentences += `<li class="sentence">"${sentence}"</li><br>`;
-            //     }
-            // } else {
-            //     printableSentences += 'No sentences available';
-            // }
-
             let type = entry.type;
-
-            // formatting synonyms
-            // let synonyms = entry.synonym;
-            // let printableSynonyms = "";
-            // if (synonyms.length > 0) {
-            //     let cnt = 0;
-            //     for (syn of synonyms) {
-            //         printableSynonyms += `<h3 class="synonym">${syn} </h3>`;
-            //     }
-            // }
 
             content += `
                 <div class="wrapper">
@@ -175,43 +147,11 @@ async function triggerPopup(selectedText) {
                     <div class="syn-container">${synHtml}</div>
                     <ul class="def-list">${defHtml}</ul>
                     <div class="extra-def-btn">▶ Extra Definitions</div>
-                    <ul class="extra-def-ul visible>
                     </ul>
+                    <ul class="extra-def-ul visible"></ul>
                 </div>
-            `;
-
-            // content += `
-            //         <div class="wrapper">
-            //             <div class="main">
-            //                 <h2 class="word">${selectedText} - <span class="type">${type}</span></h2>
-            //                 <p class="syn-title"><i>Synonyms</i></p> ${printableSynonyms}
-                            
-            //             </div>
-            //             <div class="definitions">
-            //                 <ul class="def-list">
-            //                 ${printableDef}
-            //                 ${printableSentences}
-                            
-            //                 </ul>
-            //                 <li class="extra-def-btn"><span = "extra-def-span">▶ Show Extra</span></li>
-            //                 <br>
-            //                 <ul class="extra-def-ul visible">
-            //                     <ul class="def-list">
-            //                         <!--space for extra defs-->
-            //                     </ul>
-            //                 </ul>
-            //             </div>
-            //         </div>
-            //     `;
-
+            `;    
             createPopup(content);
-            // will decide if i want to un-comment this
-            // if (defs.length > 0) {
-            // } else {
-            //     console.log(`No match found for ${selectedText}`);
-            // }
-            // console.log(`Extracted Text: ${selectedText}`);
-
         } 
 }
 
@@ -232,7 +172,10 @@ function positionPopup(popupElement) {
         // ask gemini about this in a bit
         if (left + 350 > window.innerWidth) // popup width is 350px
         {
-            left = window.innerWidth - 370;
+            left = window.innerWidth - 400;
+        }
+        if (top + 400 > window.innerHeight) {
+            top = window.innerHeight - 350;
         } 
 
         popupElement.style.top = `${top}px`;

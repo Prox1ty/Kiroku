@@ -5,89 +5,117 @@
     box-sizing: border-box;
 }
 
+.wrapper {
+    display: block;
+}
+
 .popup {
     all: initial; /* resetting styles */
     position: fixed;
-    top: 50px;
-    left: 50px;
-    border: 2px white solid;
-    padding: 8px;
-    background-color: rgb(43, 43, 43);
-    color: white;
-    border-radius: 6px;
-    z-index: 1000;
-    font-size: 20px;
-    min-height: 250px;
-    min-width: 450px;
-    max-height: 250px;
-    max-width: 450px;
-    overflow-y: scroll;
+    z-index: 2147483647;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: rgba(30, 30, 32, 0.95);
+    backdrop-filter: blur(8px); /* will blur the area behind the translucent popup */
+    color: #e0e0e0;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* no h-offset, 10px v-offset, 25px blur */
+    padding: 16px;
+    width: 350px;
+    max-height: 300px;
+    overflow-y: auto; /* scroll basically */
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* gap between rows and columns in a flexbox */
 }
 
-.sentence {
-    font-style: italic;
-    color: rgba(255,255,255,0.6)
+/* scrollbar styling */
+.popup::-webkit-scrollbar {
+    width: 6px;
 }
 
+.popup::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
 
-.word {
-    font-weight: bold;
-    font-size: 26px;
-    color: white;
-    text-wrap-mode: wrap;
-    border-bottom: none;
+.word-header {
     display: flex;
     align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.word {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: capitalize; /* capitalizes first letter of every word */
 }
 
 .type {
-    font-size: 14px;
-    font-weight: normal;
-    border: 2px solid purple;
-    background-color: purple;
-    border-radius: 5px;
-    padding: 2px;
-    margin-left: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #7c3aed;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
 }
 
-.definitions {
-    font-size: 14px;
-}
-
-.def-list {
-    background-color: rgb(29, 22, 22);
-    padding: 10px;
-    border-left: 2px solid;
-    border-radius: 15px;
-    margin: 0 auto;
-    padding-left: 30px;
+.syn-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
 }
 
 .synonym {
-    font-weight: normal;
-    font-size: 80%;
-    color: white;
-    display: inline;
-    margin-top: 5px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 3px 8px;
+    border-radius: 12px;
+    color: #bbb;
 }
 
-.syn-title {
-    color: rgb(104, 104, 104);
-    font-size: 15px;
+.def-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.def-item {
+    font-size: 14px;
+    line-height: 1.5; /* normal line height wese but can be used to add gaps between lines */
+    margin-bottom: 12px;
+    color: #d1d1d1;
+}
+
+.sentence {
+    display: block;
+    font-size: 13px;
+    font-style: italic;
+    color: #94a3b8;
+    margin-top: 4px;
+    border-left: 2px solid #4b5563;
+    padding-left: 8px;
+}
+
+.extra-def-btn {
+    cursor: pointer; /* gives cursor feedback */
+    font-size: 13px;
+    color: #a78bfa;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+}
+
+.extra-def-btn:hover {
+    color: #c4b5fd;
 }
 
 .visible {
     display: none;
-}
-
-.extra-def-btn {
-    list-style-type: none;
-}
-
-.extra-def-btn::before {
-    
-    background-color: rgb(43, 43, 43);
-    color: white;
-    margin-right: 10px; /* Space between arrow and text */
-
 }
