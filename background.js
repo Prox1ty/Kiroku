@@ -1,5 +1,5 @@
 // import Dexie from './dexie.mjs';
-importScripts('./browser-polyfill.js', './dexie.js');
+importScripts('./browser-polyfill.js', './dexie.js', './anki.js');
 
 const db = new Dexie("DictionaryDB");
 // 
@@ -162,3 +162,7 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
 
     return true;
 })
+
+
+
+getDecks();
