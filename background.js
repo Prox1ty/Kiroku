@@ -163,6 +163,27 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
     return true;
 })
 
+browser.runtime.onMessage.addListener((message, _, sendResponse) => {
+    (async () => {
+    if (message.action == "ankiStatus") {
+        const res = await getAnkiVersion();
+        try {
+            sendResponse({
+                'result': res,
+                'error': null
+            });
+        } catch (error) {
+            sendResponse({
+                'result': null,
+                'error': error
+            });
+        }
+    }
+})();
+    return true; // keeping channel open for async operations
+});
+
 
 
 getDecks();
+// addAnkiNote();

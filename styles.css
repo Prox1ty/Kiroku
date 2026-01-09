@@ -41,7 +41,9 @@
 
 .word-header {
     display: flex;
+    flex-direction: row;
     align-items: center;
+    width: 100%;
     gap: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
@@ -118,4 +120,22 @@
 
 .visible {
     display: none;
+}
+
+.addNoteBtn {
+    width: 20px;
+    height: 20px;
+    padding: 1px;
+    color: white;
+    background: rgb(71, 191, 71);
+    margin-left: auto;
+    border: 1px solid;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    font-size: 20px;
 }

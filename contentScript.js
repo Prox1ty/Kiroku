@@ -121,6 +121,13 @@ async function getDefinition(selectedWord) {
 
 async function triggerPopup(selectedText) {
     content = "";
+        const ankiVer = await checkAnkiConnectivity();
+        let ankiNoteButton = false;
+        if (ankiVer) {
+            ankiNoteButton = true;
+        }
+        console.log(ankiVer);
+
         const dict = await getDefinition(selectedText); 
         if (dict.length === 0) {
             wordFound = false;
@@ -143,6 +150,8 @@ async function triggerPopup(selectedText) {
                     <div class="word-header">
                         <span class="word">${selectedText}</span>
                         <span class="type">${type}</span>
+                        ${ankiNoteButton ? `<button class="addNoteBtn">+</button>` : ``}
+                        <!-- space for button that find existing note in anki -->
                     </div>
                     <div class="syn-container">${synHtml}</div>
                     <ul class="def-list">${defHtml}</ul>
@@ -181,5 +190,19 @@ function positionPopup(popupElement) {
         popupElement.style.top = `${top}px`;
         popupElement.style.left = `${left}px`;
 
+    }
+}
+
+async function checkAnkiConnectivity() {
+    const response = await browser.runtime.sendMessage({
+        action: "ankiStatus"
+    });
+
+    try {
+        if (response.result != null && response.error == null) {
+            return response.result;
+        }
+    } catch (error) {
+        console.error("Error connecting to anki: ", error);
     }
 }
