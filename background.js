@@ -166,22 +166,46 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
 browser.runtime.onMessage.addListener((message, _, sendResponse) => {
     (async () => {
     if (message.action == "ankiStatus") {
-        const res = await getAnkiVersion();
-        try {
+        const version = await getAnkiVersion();
+        
+        if (version !== null) {
             sendResponse({
-                'result': res,
-                'error': null
+                'result': version,
+                'error': null 
             });
-        } catch (error) {
+        } else {
             sendResponse({
                 'result': null,
-                'error': error
+                'error': true
             });
         }
     }
 })();
     return true; // keeping channel open for async operations
 });
+
+browser.runtime.onMessage.addListener((message, _, sendResponse) => {
+    (async () => {
+        if (message.action == 'addNote') {
+            try {
+                const response = await addAnkiNote(message.data);
+                sendResponse({
+                    result: response,
+                    error: null
+                })
+            } catch (error) {
+                console.error('Error in card creation (background.js): ', error);
+                sendResponse({
+                    result: null,
+                    error: error
+                });
+            }
+        }
+    })();
+
+    return true; // keep channel open for async operations
+});
+
 
 
 

@@ -1,4 +1,4 @@
-importScripts('./browser-polyfill.js');
+// importScripts('./browser-polyfill.js');
 async function ankiConnectInvoke(action, version, params={}) {
     try {
         const response = await fetch('http://127.0.0.1:8765', {
@@ -56,23 +56,29 @@ async function addAnkiNote(entryData) {
 
     const deckName = settings.selectedDeck;
     const modelName = settings.selectedModel;
-    const template = settings.allMappings[modelName];
 
     const finalFields = {};
     for (const [ankiField, template] of Object.entries(mapping)) {
         finalFields[ankiField] = fillTemplate(template, entryData);
     }
-    // fix this later
 
     console.log(finalFields);
 
-    // const result = await ankiConnectInvoke('addNote', 5, {
-    //     "note": {
-    //         "deckName": deckName,
-    //         "modelName": modelName,
-    //         "fields": mapping
-    //     }
-    // });
+    try {
+        const result = await ankiConnectInvoke('addNote', 5, {
+            "note": {
+                "deckName": deckName,
+                "modelName": modelName,
+                "fields": finalFields,
+                "tags": "custom-extension"
+            }
+        });
+
+        return result.result; // id of the card
+    } catch(e) {
+        console.error("Anki card created, error connecting to anki: ", e);
+        return null;
+    }
     
 }
 
@@ -85,6 +91,6 @@ async function getAnkiVersion() {
         }
     } catch (error) {
         console.error("An error occured while connecting to anki");
-        return error;
+        return null;
     }
 }

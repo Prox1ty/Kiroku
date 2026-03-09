@@ -3,6 +3,14 @@ let popup = null;
 let data = null;
 let dataLoaded = false;
 
+let currWordData = {
+    word: "",
+    type: "",
+    definition: [],
+    synonym: [],
+    sentence: []
+}
+
 // Track the element the user is hovering over
 // document.addEventListener("mouseover", (event) => {
 //     hoveredElement = event.target;
@@ -123,8 +131,9 @@ async function triggerPopup(selectedText) {
     content = "";
         const ankiVer = await checkAnkiConnectivity();
         let ankiNoteButton = false;
-        if (ankiVer) {
+        if (ankiVer != null) {
             ankiNoteButton = true;
+            addListenerToAddNoteBtn();
         }
         console.log(ankiVer);
 
@@ -137,13 +146,22 @@ async function triggerPopup(selectedText) {
         }
         for (let entry of dict) {
 
-            let synHtml = entry.synonym.map(s => `<span class="synonym">${s}</span>`).join("");
+            let synHtml = entry.synonym.map(s => {
+                currWordData.synonym.push(s);
+                return `<span class="synonym">${s}</span>`
+            }).join("");
+
             let defHtml = entry.definition.map((d, i) => {
+                currWordData.definition.push(d);
+                currWordData.sentence.push(entry.sentence[i]);
                 const sentence = entry.sentence[i] ? `<span class="sentence">${entry.sentence[i]}</span>` : "";
                 return `<li class="def-item">${d}${sentence}</li>`
             }).join("");    
 
             let type = entry.type;
+
+            currWordData.word = selectedText;
+            currWordData.type = type;
 
             content += `
                 <div class="wrapper">
@@ -194,15 +212,66 @@ function positionPopup(popupElement) {
 }
 
 async function checkAnkiConnectivity() {
-    const response = await browser.runtime.sendMessage({
-        action: "ankiStatus"
-    });
-
     try {
+        const response = await browser.runtime.sendMessage({
+            action: "ankiStatus"
+        });
+
         if (response.result != null && response.error == null) {
             return response.result;
         }
-    } catch (error) {
-        console.error("Error connecting to anki: ", error);
-    }
+        console.error("Could not establish connection with anki");
+        return null;
+    } catch(error) {
+        console.error('Internal extension messaging error: ', error);
+        return null;
+    } 
+}
+
+async function addListenerToAddNoteBtn() {
+    const addNoteBtn = document.querySelector('.addNoteBtn');
+    if (addNoteBtn) {
+        addNoteBtn.addEventListener('click', () => {
+            addNoteBtn.disabled = true;
+            (async () => {
+                try {
+                    const response = await browser.runtime.sendMessage({
+                        action: 'addNote',
+                        data: currWordData
+                    });
+                    if (response.error == null && response.result != null) {
+                        console.log('Request to create card has been processed');
+
+                        addNoteBtn.disabled = false;
+                        addNoteBtn.style.background = 'rgb(227, 9, 198)';
+                        addNoteBtn.title = "Add duplicate?: ";
+
+                        const wordHeader = document.querySelector('.word-header');
+                        const lookupBtn = document.createElement('button');
+                        lookupBtn.classList.add('lookupBtn');
+                        lookupBtn.title = "Open in Anki";
+                        lookupBtn.value = response.result;
+                        lookupBtn.addEventListener('click', () => {
+                            const cardId = lookupBtn.value;
+                        });
+                        // big issue. browser has no way of knowing if a card has been created for this word already
+                        // figure out how to do that and if a card has been created, then the lookup button should show up without having to click addNoteBtn
+                        wordHeader.appendChild(lookupBtn);
+
+                        return response.result;
+                    }
+                } catch(e) {
+                    console.error('Error adding note to anki: ', e);
+                    return null;
+                }
+            })();
+        });
+    }   
+}
+
+function addEventListenerToLookup() {
+    const lookupBtn = document.querySelector('.lookupBtn');
+    lookupBtn.addEventListener('click', () => {
+        const cardId = lookupBtn.value;
+    }); 
 }
