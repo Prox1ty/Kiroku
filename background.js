@@ -7,9 +7,6 @@ db.version(1).stores({
     dictionary: '++id, word'
 });
 
-(async () => {
-    await db.open();
-})();
 
 browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === "install") {
@@ -31,7 +28,7 @@ async function seedDictionary() {
 
     if (count > 0) {
         console.log("Database has already been populated. Exiting...");
-        return;
+        return null;
     }
 
     const files = [
@@ -145,44 +142,27 @@ async function fillDB(fileURL, db, typeWord) {
 // listening for messages for database calls
 browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle "sender" paremter is 
     // not needed
-    if (message.action == "searchWord") {
-        (async () => {
-            try {
-                const response = await db.dictionary.where('word')
-                    .equals(message.word.toLowerCase())
-                    .toArray();
+    if (message.action === "searchWord") {
+        db.dictionary.where('word')
+        .equals(message.word.toLowerCase())
+        .toArray()
+        .then(res => sendResponse({success: true, data: response}))
+        .catch(err => sendResponse({success: false, data: err.message}))
 
-                sendResponse({ success: true, data: response });
-            } catch (error) {
-                console.error(`Error occured while querying for ${message.word}: `, error);
-                sendResponse({ success: false, data: error.message });
-            }
-        })();
-    }
+        return true; // keep channel open for async response
 
-    return true;
-})
+        }   else if (message.action === "ankiStatus") {
+            getAnkiVersion()
+            .then(res=> sendResponse({success: true, data: res}))
+            .catch(err=> sendResponse({success: false, error: error.message || err}));
+            
+            return true; // keep channel open for async response
 
-browser.runtime.onMessage.addListener((message, _, sendResponse) => {
-    (async () => {
-    if (message.action == "ankiStatus") {
-        const res = await getAnkiVersion();
-        try {
-            sendResponse({
-                'result': res,
-                'error': null
-            });
-        } catch (error) {
-            sendResponse({
-                'result': null,
-                'error': error
-            });
-        }
-    }
-})();
-    return true; // keeping channel open for async operations
-});
+        }   else if (message.action === 'fetchDecks') {
+            getDecks()
+            .then(res => sendResponse({success: true, data: decks}))
+            .catch(err => sendResponse({success: false, data: null}));
 
-
-
-getDecks();
+            return true;
+        }   
+    });
