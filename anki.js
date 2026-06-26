@@ -1,4 +1,3 @@
-importScripts('./browser-polyfill.js');
 async function ankiConnectInvoke(action, version, params={}) {
     try {
         const response = await fetch('http://127.0.0.1:8765', {
@@ -51,7 +50,7 @@ function fillTemplate(template, data) {
 }
 
 async function addAnkiNote(entryData) {
-    const settings = await browser.storage.local.get(['selectedModel', 'allMappings', 'deckName']);
+    const settings = await browser.storage.local.get(['selectedModel', 'allMappings', 'selectedDeck']);
     const mapping = settings.allMappings[settings.selectedModel];
 
     const deckName = settings.selectedDeck;
@@ -88,3 +87,5 @@ async function getAnkiVersion() {
         return error;
     }
 }
+
+export { getAnkiVersion };
