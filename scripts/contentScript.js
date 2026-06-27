@@ -106,11 +106,12 @@ async function getDefinition(selectedWord) {
         return definitionCache.get(selectedWord);
     }
 
-    const response = await browser.runtime.sendMessage({
-        action: "searchWord",
-        word: selectedWord
-    });
     try {
+        const response = await browser.runtime.sendMessage({
+            action: "searchWord",
+            word: selectedWord
+        });
+
         if (response.success && response.data.length > 0) {
             definitionCache.set(selectedWord, response.data);
             // ---- debugging purposes
@@ -119,6 +120,7 @@ async function getDefinition(selectedWord) {
             // ----
             return response.data;
         }
+        console.log("Error possibly?");
         return [];
     } catch (error) {
         console.error(`Error occured after response was resolved: ${error}`);
@@ -127,13 +129,27 @@ async function getDefinition(selectedWord) {
 
 }
 
+let activePopupEntries = {}; // store current popup entries
+
 async function triggerPopup(selectedText) {
     content = "";
         const ankiVer = await checkAnkiConnectivity();
+        const ankiButtons = [];
         let ankiNoteButton = false;
         if (ankiVer) {
             ankiNoteButton = true;
         }
+
+        if (ankiNoteButton) {
+            const addNoteBtnHTML = `<button class="addNoteBtn"> + </button>`
+            const ankiLookupBtnHTML = `<button id="lookUpBtn"> ? </button>`
+
+            ankiButtons.push(ankiLookupBtnHTML);
+            ankiButtons.push(addNoteBtnHTML);
+        }
+
+        const ankiButtonsHTML = ankiButtons.join("");
+
         console.log(ankiVer);
 
         const dict = await getDefinition(selectedText); 
@@ -159,15 +175,44 @@ async function triggerPopup(selectedText) {
 
             let type = entry.type;
 
-            currWordData.word = selectedText;
-            currWordData.type = type;
+            // these are here to save time by not doing everything all over again.
+            // since currWordData is already storing the correct data, we will reuse it for now.
 
+            currWordData.word = selectedText; 
+            currWordData.type = type;
+            currWordData.tabName = document.title;
+            currWordData.id = entry.id;
+
+            // gonna try not to touch whats already working...
+            
+            let ankiDef = currWordData.definition.map((d) => {
+                return `<span class="definition">${d}</span>`
+            }).join(""); // custom for my note type
+            let ankiSentence = currWordData.sentence.map((s) => {
+                return `<span class="sentence">${s}</span>`;
+            }).join(""); // custom for my note type 
+
+            // saving here
+            activePopupEntries[entry.id] = {
+                "word": selectedText,
+                "type": type,
+                "definition": ankiDef,
+                "sentence": ankiSentence,
+                "synonyms": synHtml, // keeping this the same
+                "tabName": `${currWordData.tabName}`,
+                "id": currWordData.id
+            }
+
+            // entry id stored in parent of ankiButtons
             content += `
-                <div class="wrapper">
-                    <div class="word-header">
-                        <span class="word">${selectedText}</span>
-                        <span class="type">${type}</span>
-                    </div>
+                <div class="wrapper" data-entry-id="${entry.id}">
+                    <div id="upper-box">
+                        <div class="word-header">
+                            <span class="word">${selectedText}</span>
+                            <span class="type">${type}</span>
+                        </div>
+                        <div class="ankiBtnDiv" data-id="${entry.id}">${ankiButtonsHTML}</div> 
+                    </div> 
                     <div class="syn-container">${synHtml}</div>
                     <ul class="def-list">${defHtml}</ul>
                     <div class="extra-def-btn">▶ Extra Definitions</div>
@@ -175,8 +220,9 @@ async function triggerPopup(selectedText) {
                     <ul class="extra-def-ul visible"></ul>
                 </div>
             `;    
-            createPopup(content);
         } 
+        createPopup(content);
+        attachAnkiButtonListeners();
 }
 
 function triggerPopupWithoutRefreshing() {
@@ -207,16 +253,65 @@ function positionPopup(popupElement) {
     }
 }
 
-async function checkAnkiConnectivity() {
-    const response = await browser.runtime.sendMessage({
-        action: "ankiStatus"
-    });
+function attachAnkiButtonListeners() {
+    const buttons = document.querySelectorAll('.addNoteBtn');
+    buttons.forEach(button => {
+        button.addEventListener('click', async(event) => {
+            const parentContainer = event.target.closest('.ankiBtnDiv');
+            const entryId = parentContainer ? parentContainer.dataset.id : null;
 
+            if (entryId) {
+                const entryData = activePopupEntries[entryId];
+                addNote(entryData, event.target);
+            }
+        })
+    })
+}
+
+async function checkAnkiConnectivity() {
+    
     try {
-        if (response.success != false && response.error == null) {
+
+        const response = await browser.runtime.sendMessage({
+            action: "ankiStatus"
+        });
+        console.log(response);
+        const connected = (typeof response.data == "number" ? true : false); // ankiStatus always returns a version number. Upon failure it will return empty object
+        if (connected) {
             return response.data;
+        } else {
+            return null;
         }
     } catch (error) {
         console.error("Error connecting to anki: ", error);
+        return null;
+    }
+}
+
+async function addNote(expressionObject, addNoteBtn) {
+    // check connectivity before adding.
+    console.log("add note function running");
+    try {
+        addNoteBtn.classList.add('gray-out');
+        let added = false;
+        let error = false;
+        const response = await checkAnkiConnectivity();
+        if (typeof response == "number") {
+            // send a message
+            console.log("Anki version received, Anki is active. Adding note to Anki.");
+            const msgResponse = await browser.runtime.sendMessage({ action: "addNote", version: 5, params: expressionObject })
+            console.log("Add note message sent to service worker");
+            if (msgResponse.success == true && msgResponse.data != false) {
+                console.log("Response succeeded.");
+                addNoteBtn.classList.remove('gray-out');
+                addNoteBtn.classList.add("added");
+            } else if (msgResponse.data == false) {
+                console.log("Adding anki note FAILED");
+            } 
+            // do something for the lookup button too.
+        }
+    } catch(err) {
+        console.error("Failed to add card to anki: ", err);
+        addNoteBtn.classList.remove('gray-out');
     }
 }
