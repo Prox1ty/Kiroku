@@ -57,6 +57,13 @@ async function addAnkiNote(entryData) {
     const modelName = settings.selectedModel;
     const template = settings.allMappings[modelName];
 
+    // if allMappings is an empty object then we assume default addNote behavior
+    const defaultPreset = settings.allMappings.length == 0;
+
+    if (defaultPreset) {
+        // Basic note type. 
+    }
+
     const finalFields = {};
     for (const [ankiField, template] of Object.entries(mapping)) {
         finalFields[ankiField] = fillTemplate(template, entryData);

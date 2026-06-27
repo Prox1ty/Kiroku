@@ -167,5 +167,7 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
             .catch(err => sendResponse({success: false, data: null}));
 
             return true;
-        }   
+        }   else if (message.action === "addNote") {
+            
+        }
     });

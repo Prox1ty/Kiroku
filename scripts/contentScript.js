@@ -139,7 +139,7 @@ async function triggerPopup(selectedText) {
         }
 
         if (ankiNoteButton) {
-            const addNoteBtnHTML = `<button id="addNoteBtn"> + </button>`
+            const addNoteBtnHTML = `<button id="addNoteBtn" onclick=${addNote()}> + </button>`
             const ankiLookupBtnHTML = `<button id="lookUpBtn"> ? </button>`
 
             ankiButtons.push(ankiLookupBtnHTML);
@@ -192,6 +192,8 @@ async function triggerPopup(selectedText) {
                     <ul class="extra-def-ul visible"></ul>
                 </div>
             `;    
+
+            document.querySelector('#addNoteBtn').addEventListener('click', addNote(currWordData))
             createPopup(content);
         } 
 }
@@ -242,4 +244,15 @@ async function checkAnkiConnectivity() {
         console.error("Error connecting to anki: ", error);
         return null;
     }
+}
+
+async function addNote(expressionObject) {
+    // check connectivity before adding.
+    const response = await checkAnkiConnectivity();
+    if (typeof response.data == "number") {
+        // send a message
+        const success = browser.runtime.sendMessage({ action: "addNote", version: 5, params: expressionObject })
+    }
+
+
 }
