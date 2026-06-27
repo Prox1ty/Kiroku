@@ -232,7 +232,7 @@ async function checkAnkiConnectivity() {
             action: "ankiStatus"
         });
         console.log(response);
-        const connected = response?.success ?? null;
+        const connected = (typeof response.data == "number" ? true : false); // ankiStatus always returns a version number. Upon failure it will return empty object
         if (connected) {
             return response.data;
         } else {
