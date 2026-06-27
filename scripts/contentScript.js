@@ -132,10 +132,22 @@ async function getDefinition(selectedWord) {
 async function triggerPopup(selectedText) {
     content = "";
         const ankiVer = await checkAnkiConnectivity();
+        const ankiButtons = [];
         let ankiNoteButton = false;
         if (ankiVer) {
             ankiNoteButton = true;
         }
+
+        if (ankiNoteButton) {
+            const addNoteBtnHTML = `<button id="addNoteBtn"> + </button>`
+            const ankiLookupBtnHTML = `<button id="lookUpBtn"> ? </button>`
+
+            ankiButtons.push(ankiLookupBtnHTML);
+            ankiButtons.push(addNoteBtnHTML);
+        }
+
+        const ankiButtonsHTML = ankiButtons.join("");
+
         console.log(ankiVer);
 
         const dict = await getDefinition(selectedText); 
@@ -166,10 +178,13 @@ async function triggerPopup(selectedText) {
 
             content += `
                 <div class="wrapper">
-                    <div class="word-header">
-                        <span class="word">${selectedText}</span>
-                        <span class="type">${type}</span>
-                    </div>
+                    <div id="upper-box">
+                        <div class="word-header">
+                            <span class="word">${selectedText}</span>
+                            <span class="type">${type}</span>
+                        </div>
+                        <div id="ankiBtnDiv">${ankiButtonsHTML}</div>
+                    </div> 
                     <div class="syn-container">${synHtml}</div>
                     <ul class="def-list">${defHtml}</ul>
                     <div class="extra-def-btn">▶ Extra Definitions</div>
@@ -216,11 +231,15 @@ async function checkAnkiConnectivity() {
         const response = await browser.runtime.sendMessage({
             action: "ankiStatus"
         });
-
-        if (response.success != false && response.error == null) {
+        console.log(response);
+        const connected = response?.success ?? null;
+        if (connected) {
             return response.data;
+        } else {
+            return null;
         }
     } catch (error) {
         console.error("Error connecting to anki: ", error);
+        return null;
     }
 }
