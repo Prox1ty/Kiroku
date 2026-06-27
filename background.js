@@ -1,5 +1,8 @@
-// import Dexie from './dexie.mjs';
-importScripts('./browser-polyfill.js', './dexie.js', './anki.js');
+import './browser-polyfill.js';
+import './dexie.js'; // Assumes dexie.js supports default export or is bundled
+import { getAnkiVersion } from './anki.js';
+
+console.log('BACKGROUND SERVICE IS RUNNING');
 
 const db = new Dexie("DictionaryDB");
 // 
@@ -146,7 +149,7 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
         db.dictionary.where('word')
         .equals(message.word.toLowerCase())
         .toArray()
-        .then(res => sendResponse({success: true, data: response}))
+        .then(res => sendResponse({success: true, data: res}))
         .catch(err => sendResponse({success: false, data: err.message}))
 
         return true; // keep channel open for async response
@@ -160,7 +163,7 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
 
         }   else if (message.action === 'fetchDecks') {
             getDecks()
-            .then(res => sendResponse({success: true, data: decks}))
+            .then(res => sendResponse({success: true, data: res}))
             .catch(err => sendResponse({success: false, data: null}));
 
             return true;

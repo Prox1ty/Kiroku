@@ -106,11 +106,12 @@ async function getDefinition(selectedWord) {
         return definitionCache.get(selectedWord);
     }
 
-    const response = await browser.runtime.sendMessage({
-        action: "searchWord",
-        word: selectedWord
-    });
     try {
+        const response = await browser.runtime.sendMessage({
+            action: "searchWord",
+            word: selectedWord
+        });
+
         if (response.success && response.data.length > 0) {
             definitionCache.set(selectedWord, response.data);
             // ---- debugging purposes
@@ -119,6 +120,7 @@ async function getDefinition(selectedWord) {
             // ----
             return response.data;
         }
+        console.log("Error possibly?");
         return [];
     } catch (error) {
         console.error(`Error occured after response was resolved: ${error}`);
@@ -208,11 +210,13 @@ function positionPopup(popupElement) {
 }
 
 async function checkAnkiConnectivity() {
-    const response = await browser.runtime.sendMessage({
-        action: "ankiStatus"
-    });
-
+    
     try {
+
+        const response = await browser.runtime.sendMessage({
+            action: "ankiStatus"
+        });
+
         if (response.success != false && response.error == null) {
             return response.data;
         }
