@@ -1,6 +1,6 @@
 import './browser-polyfill.js';
 import './dexie.js'; // Assumes dexie.js supports default export or is bundled
-import { getAnkiVersion } from './anki.js';
+import { getAnkiVersion, addAnkiNote } from './anki.js';
 
 console.log('BACKGROUND SERVICE IS RUNNING');
 
@@ -168,6 +168,11 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
 
             return true;
         }   else if (message.action === "addNote") {
-            
+                addAnkiNote(message.params)
+                .then(res => sendResponse({ success: true, data: res }))
+                .catch(err => sendResponse({ success: false, data: null }));
+                
+
+                return true;
         }
     });

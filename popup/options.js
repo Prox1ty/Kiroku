@@ -131,7 +131,7 @@ async function getFields(selectedModel) {
         const fieldsDiv = document.getElementById('fieldsDiv');
         if (fieldsDiv) fieldsDiv.innerHTML = "";
 
-        const allOptions = ['Word', 'Type', 'Definition', 'Synonyms', 'Sentence'];
+        const allOptions = ['Word', 'Type', 'Definition', 'Synonyms', 'Sentence', 'Id'];
         fields.forEach((f) => {
             let label = document.createElement('label');
             label.htmlFor = f;
@@ -143,7 +143,7 @@ async function getFields(selectedModel) {
                 option.innerText = o;
                 option.value = o;
 
-            if (f.toLowerCase() === o.toLowerCase()) {
+            if (f.toLowerCase() == o.toLowerCase()) {
                 option.selected = true;
             }
 

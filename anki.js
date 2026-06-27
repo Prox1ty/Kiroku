@@ -50,38 +50,57 @@ function fillTemplate(template, data) {
 }
 
 async function addAnkiNote(entryData) {
-    const settings = await browser.storage.local.get(['selectedModel', 'allMappings', 'selectedDeck']);
-    const mapping = settings.allMappings[settings.selectedModel];
-
-    const deckName = settings.selectedDeck;
-    const modelName = settings.selectedModel;
-    const template = settings.allMappings[modelName];
-
-    // if allMappings is an empty object then we assume default addNote behavior
-    const defaultPreset = settings.allMappings.length == 0;
-
-    if (defaultPreset) {
-        // Basic note type. 
-    }
-
-    const finalFields = {};
-    for (const [ankiField, template] of Object.entries(mapping)) {
-        finalFields[ankiField] = fillTemplate(template, entryData);
-    }
-    // fix this later
-
-    console.log(finalFields);
-
-    // const result = await ankiConnectInvoke('addNote', 5, {
-    //     "note": {
-    //         "deckName": deckName,
-    //         "modelName": modelName,
-    //         "fields": mapping
-    //     }
-    // });
+    try {
+        const settings = await browser.storage.local.get(['selectedModel', 'allMappings', 'selectedDeck']);
     
-}
+        const mapping = settings.allMappings || { Word: "Word", Definition: "Definition" };
+        const deckName = settings.selectedDeck;
+        const modelName = settings.selectedModel;
 
+        for (let key of Object.keys(mapping)) {
+            let val = mapping[key];
+            if (val == "Word") {
+                val = entryData.word;
+            } else if (val == "Definition") {
+                val = entryData.definition;
+            } else if (val == "Synonyms") {
+                val = entryData.synonyms;
+            } else if (val == "Sentence") {
+                val = entryData.sentence;
+            } else if (val == "Type") {
+                val = entryData.type;
+            } else if (val == "Id") {
+                val = String(entryData.id);
+            }
+            mapping[key] = val;
+        } 
+
+        const payload = {
+             "note": {
+                "deckName": deckName,
+                "modelName": modelName,
+                "fields": mapping,
+                "tags": [
+                    entryData.tabName,
+                    "Made By Muaaz"
+                ],
+            }
+        }
+        console.log(deckName);
+        console.log(modelName);
+        console.log(payload);
+        const response = await ankiConnectInvoke('addNote', 6, payload);
+
+        const data = typeof response.json === 'function' ? await response.json() : response;
+        if (data.result != null || data.error == null) {
+            return true;
+        }
+    } catch (err) {
+        console.log("Error occured while adding anki note (anki.js): ", err);
+        return false;
+    }
+
+}
 async function getAnkiVersion() {
     try {
         const response = await ankiConnectInvoke('version', 5);
@@ -95,4 +114,4 @@ async function getAnkiVersion() {
     }
 }
 
-export { getAnkiVersion };
+export { getAnkiVersion, addAnkiNote };
