@@ -1,4 +1,4 @@
-import { getAnkiVersion } from "../anki.js";
+import { getAnkiVersion } from "../src/shared/anki.js";
 
 const saveBtn = document.getElementById('saveBtn');
 saveBtn.disabled = false;

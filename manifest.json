@@ -12,8 +12,8 @@
     "content_scripts" : [
         {
             "matches": ["<all_urls>"],
-            "js": ["browser-polyfill.js", "scripts/contentScript.js"],
-            "css": ["styles.css"]
+            "js": ["src/vendor/browser-polyfill.js", "src/content/contentScript.js"],
+            "css": ["src/styles/content.css"]
         }
     ],
     "web_accessible_resources": [
@@ -22,12 +22,12 @@
             "dict/data.verb",
             "dict/data.adj", 
             "dict/data.adv", 
-            "english.json"],
+            "src/data/english.json"],
             "matches": ["<all_urls>"]
         }
     ],
     "background": {
-        "service_worker": "background.js",
+        "service_worker": "src/background/background.js",
         "type": "module"
     },
     "action": {
