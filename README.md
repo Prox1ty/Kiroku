@@ -43,6 +43,7 @@ This project keeps the core idea of fast popup lookups and adapts it into a smal
 4. Select a word on a page and press `Ctrl` / `Cmd` to open the lookup popup.
 
 ## Demo Video
+https://github.com/user-attachments/assets/e3987388-e1b8-4e34-86b8-22d69b452ffe
 
 ## Notes
 
