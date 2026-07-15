@@ -247,6 +247,7 @@ async function triggerPopup(selectedText) {
 
 function triggerPopupWithoutRefreshing() {
     createPopup(content);
+    attachAnkiButtonListeners();
 }
 
 function positionPopup(popupElement) {
