@@ -11,11 +11,6 @@ let currWordData = {
     sentence: []
 }
 
-// Track the element the user is hovering over
-// document.addEventListener("mouseover", (event) => {
-//     hoveredElement = event.target;
-// });
-
 document.addEventListener("click", (event) => {
     try {
         if (popup) {
@@ -57,6 +52,31 @@ const createPopup = (content) => {
     positionPopup(popup);
     document.body.appendChild(popup);
     console.log("pop!")
+}
+
+const clearPopupBanner = () => {
+    if (!popup) {
+        return;
+    }
+
+    const existingBanner = popup.querySelector(".anki-duplicate-banner");
+    if (existingBanner) {
+        existingBanner.remove();
+    }
+}
+
+const showDuplicateBanner = () => {
+    if (!popup) {
+        return;
+    }
+
+    clearPopupBanner();
+
+    const banner = document.createElement("div");
+    banner.className = "anki-duplicate-banner";
+    banner.textContent = "Expression already added to Anki";
+
+    popup.appendChild(banner);
 }
 
 const removePopup = () => {
@@ -133,96 +153,96 @@ let activePopupEntries = {}; // store current popup entries
 
 async function triggerPopup(selectedText) {
     content = "";
-        const ankiVer = await checkAnkiConnectivity();
-        const ankiButtons = [];
-        let ankiNoteButton = false;
-        if (ankiVer) {
-            ankiNoteButton = true;
+    const ankiVer = await checkAnkiConnectivity();
+    const ankiButtons = [];
+    let ankiNoteButton = false;
+    if (ankiVer) {
+        ankiNoteButton = true;
+    }
+
+    if (ankiNoteButton) {
+        const addNoteBtnHTML = `<button class="addNoteBtn"> + </button>`
+        const ankiLookupBtnHTML = `<button id="lookUpBtn"> ? </button>`
+
+        ankiButtons.push(ankiLookupBtnHTML);
+        ankiButtons.push(addNoteBtnHTML);
+    }
+
+    const ankiButtonsHTML = ankiButtons.join("");
+
+    console.log(ankiVer);
+
+    const dict = await getDefinition(selectedText); 
+    if (dict.length === 0) {
+        wordFound = false;
+        return;
+    } else {
+        wordFound = true;
+    }
+    for (let entry of dict) {
+
+        let synHtml = entry.synonym.map(s => {
+            currWordData.synonym.push(s);
+            return `<span class="synonym">${s}</span>`
+        }).join("");
+
+        let defHtml = entry.definition.map((d, i) => {
+            currWordData.definition.push(d);
+            currWordData.sentence.push(entry.sentence[i]);
+            const sentence = entry.sentence[i] ? `<span class="sentence">${entry.sentence[i]}</span>` : "";
+            return `<li class="def-item">${d}${sentence}</li>`
+        }).join("");    
+
+        let type = entry.type;
+
+        // these are here to save time by not doing everything all over again.
+        // since currWordData is already storing the correct data, we will reuse it for now.
+
+        currWordData.word = selectedText; 
+        currWordData.type = type;
+        currWordData.tabName = document.title;
+        currWordData.id = entry.id;
+
+        // gonna try not to touch whats already working...
+        
+        let ankiDef = currWordData.definition.map((d) => {
+            return `<span class="definition">${d}</span>`
+        }).join(""); // custom for my note type
+        let ankiSentence = currWordData.sentence.map((s) => {
+            return `<span class="sentence">${s}</span>`;
+        }).join(""); // custom for my note type 
+
+        // saving here
+        activePopupEntries[entry.id] = {
+            "word": selectedText,
+            "type": type,
+            "definition": ankiDef,
+            "sentence": ankiSentence,
+            "synonyms": synHtml, // keeping this the same
+            "tabName": `${currWordData.tabName}`,
+            "id": currWordData.id
         }
 
-        if (ankiNoteButton) {
-            const addNoteBtnHTML = `<button class="addNoteBtn"> + </button>`
-            const ankiLookupBtnHTML = `<button id="lookUpBtn"> ? </button>`
-
-            ankiButtons.push(ankiLookupBtnHTML);
-            ankiButtons.push(addNoteBtnHTML);
-        }
-
-        const ankiButtonsHTML = ankiButtons.join("");
-
-        console.log(ankiVer);
-
-        const dict = await getDefinition(selectedText); 
-        if (dict.length === 0) {
-            wordFound = false;
-            return;
-        } else {
-            wordFound = true;
-        }
-        for (let entry of dict) {
-
-            let synHtml = entry.synonym.map(s => {
-                currWordData.synonym.push(s);
-                return `<span class="synonym">${s}</span>`
-            }).join("");
-
-            let defHtml = entry.definition.map((d, i) => {
-                currWordData.definition.push(d);
-                currWordData.sentence.push(entry.sentence[i]);
-                const sentence = entry.sentence[i] ? `<span class="sentence">${entry.sentence[i]}</span>` : "";
-                return `<li class="def-item">${d}${sentence}</li>`
-            }).join("");    
-
-            let type = entry.type;
-
-            // these are here to save time by not doing everything all over again.
-            // since currWordData is already storing the correct data, we will reuse it for now.
-
-            currWordData.word = selectedText; 
-            currWordData.type = type;
-            currWordData.tabName = document.title;
-            currWordData.id = entry.id;
-
-            // gonna try not to touch whats already working...
-            
-            let ankiDef = currWordData.definition.map((d) => {
-                return `<span class="definition">${d}</span>`
-            }).join(""); // custom for my note type
-            let ankiSentence = currWordData.sentence.map((s) => {
-                return `<span class="sentence">${s}</span>`;
-            }).join(""); // custom for my note type 
-
-            // saving here
-            activePopupEntries[entry.id] = {
-                "word": selectedText,
-                "type": type,
-                "definition": ankiDef,
-                "sentence": ankiSentence,
-                "synonyms": synHtml, // keeping this the same
-                "tabName": `${currWordData.tabName}`,
-                "id": currWordData.id
-            }
-
-            // entry id stored in parent of ankiButtons
-            content += `
-                <div class="wrapper" data-entry-id="${entry.id}">
-                    <div id="upper-box">
-                        <div class="word-header">
-                            <span class="word">${selectedText}</span>
-                            <span class="type">${type}</span>
-                        </div>
-                        <div class="ankiBtnDiv" data-id="${entry.id}">${ankiButtonsHTML}</div> 
-                    </div> 
-                    <div class="syn-container">${synHtml}</div>
-                    <ul class="def-list">${defHtml}</ul>
-                    <div class="extra-def-btn">▶ Extra Definitions</div>
-                    </ul>
-                    <ul class="extra-def-ul visible"></ul>
-                </div>
-            `;    
-        } 
-        createPopup(content);
-        attachAnkiButtonListeners();
+        // entry id stored in parent of ankiButtons
+        content += `
+            <div class="wrapper" data-entry-id="${entry.id}">
+                <div id="upper-box">
+                    <div class="word-header">
+                        <span class="word">${selectedText}</span>
+                        <span class="type">${type}</span>
+                    </div>
+                    <div class="ankiBtnDiv" data-id="${entry.id}">${ankiButtonsHTML}</div> 
+                </div> 
+                <div class="syn-container">${synHtml}</div>
+                <ul class="def-list">${defHtml}</ul>
+                <div class="extra-def-btn">▶ Extra Definitions</div>
+                </ul>
+                <ul class="extra-def-ul visible"></ul>
+            </div>
+        `;    
+    } 
+    createPopup(content);
+    attachAnkiButtonListeners();
 }
 
 function triggerPopupWithoutRefreshing() {
@@ -293,17 +313,18 @@ async function addNote(expressionObject, addNoteBtn) {
     console.log("add note function running");
     try {
         addNoteBtn.classList.add('gray-out');
-        let added = false;
-        let error = false;
         const response = await checkAnkiConnectivity();
         if (typeof response == "number") {
             // send a message
             console.log("Anki version received, Anki is active. Adding note to Anki.");
             const msgResponse = await browser.runtime.sendMessage({ action: "addNote", version: 5, params: expressionObject })
             console.log("Add note message sent to service worker");
-            if (msgResponse.success == true && msgResponse.data != false) {
+            if (msgResponse.duplicate) {
+                addNoteBtn.classList.add('duplicate');
+                showDuplicateBanner();
+            } else if (msgResponse.success == true && msgResponse.data != false) {
                 console.log("Response succeeded.");
-                addNoteBtn.classList.remove('gray-out');
+                clearPopupBanner();
                 addNoteBtn.classList.add("added");
             } else if (msgResponse.data == false) {
                 console.log("Adding anki note FAILED");
@@ -312,6 +333,7 @@ async function addNote(expressionObject, addNoteBtn) {
         }
     } catch(err) {
         console.error("Failed to add card to anki: ", err);
+    } finally {
         addNoteBtn.classList.remove('gray-out');
     }
 }

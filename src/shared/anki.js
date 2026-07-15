@@ -43,11 +43,6 @@ async function getNoteTypes() {
     }
 }
 
-function fillTemplate(template, data) {
-    return template.replace(/{(\w+)}/g, (match, key) => {
-        return data[key] || match;
-    });
-}
 
 async function addAnkiNote(entryData) {
     try {
@@ -89,15 +84,16 @@ async function addAnkiNote(entryData) {
         console.log(deckName);
         console.log(modelName);
         console.log(payload);
-        const response = await ankiConnectInvoke('addNote', 6, payload);
-
-        const data = typeof response.json === 'function' ? await response.json() : response;
-        if (data.result != null || data.error == null) {
-            return true;
-        }
+        await ankiConnectInvoke('addNote', 6, payload);
+        return { success: true, duplicate: false };
     } catch (err) {
         console.log("Error occured while adding anki note (anki.js): ", err);
-        return false;
+        const message = typeof err === 'string' ? err : err?.message || String(err);
+        if (/duplicate/i.test(message)) { // checking if the error message returned by ankiConnect contained the word duplicate
+            return { success: false, duplicate: true, error: message };
+        }
+
+        return { success: false, duplicate: false, error: message };
     }
 
 }
@@ -114,4 +110,18 @@ async function getAnkiVersion() {
     }
 }
 
-export { getAnkiVersion, addAnkiNote };
+async function findNote(id) {
+    try {
+        const { selectedDeck } = await browser.storage.local.get('selectedDeck');
+        const query = selectedDeck ? `deck:${selectedDeck} ${id}` : `${id}`;
+        const response = await ankiConnectInvoke('findCards', 6, { query });
+
+        return Array.isArray(response) ? response : [];
+
+    } catch (err) {
+        console.error("Error occured while querying anki for note id: ", err);
+        return [];
+    }
+}
+
+export { getAnkiVersion, addAnkiNote, findNote };

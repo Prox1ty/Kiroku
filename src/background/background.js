@@ -1,6 +1,6 @@
-import './browser-polyfill.js';
-import './dexie.js'; // Assumes dexie.js supports default export or is bundled
-import { getAnkiVersion, addAnkiNote } from './anki.js';
+import '../vendor/browser-polyfill.js';
+import '../vendor/dexie.js'; // Assumes dexie.js supports default export or is bundled
+import { getAnkiVersion, addAnkiNote, findNote } from '../shared/anki.js';
 
 console.log('BACKGROUND SERVICE IS RUNNING');
 
@@ -149,30 +149,45 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
         db.dictionary.where('word')
         .equals(message.word.toLowerCase())
         .toArray()
-        .then(res => sendResponse({success: true, data: res}))
+        .then(res => { 
+            return sendResponse({success: true, data: res})
+        })
         .catch(err => sendResponse({success: false, data: err.message}))
+
+
 
         return true; // keep channel open for async response
 
-        }   else if (message.action === "ankiStatus") {
+    }   else if (message.action === "ankiStatus") {
             getAnkiVersion()
             .then(res=> sendResponse({success: true, data: res}))
             .catch(err=> sendResponse({success: false, error: error.message || err}));
             
             return true; // keep channel open for async response
 
-        }   else if (message.action === 'fetchDecks') {
+    }   else if (message.action === 'fetchDecks') {
             getDecks()
             .then(res => sendResponse({success: true, data: res}))
             .catch(err => sendResponse({success: false, data: null}));
 
             return true;
-        }   else if (message.action === "addNote") {
-                addAnkiNote(message.params)
-                .then(res => sendResponse({ success: true, data: res }))
-                .catch(err => sendResponse({ success: false, data: null }));
-                
+    }   else if (message.action === "addNote") {
+            findNote(message.params.id)
+            .then(res => {
+                if (res.length >= 1) {
+                    sendResponse({ success: true, data: res, duplicate: true });
+                    return;
+                }
 
-                return true;
-        }
-    });
+                return addAnkiNote(message.params)
+                .then(res => sendResponse({ success: res.success, data: res, duplicate: res.duplicate }))
+                .catch(err => sendResponse({ success: false, data: null, duplicate: false }));
+            })
+            .catch(err => {
+                console.log("Error querying anki for existing/non-existing word");
+                return sendResponse({ success: false, data: null, duplicate: false })
+            })
+    }   
+            
+        return true;
+});
