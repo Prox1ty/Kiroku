@@ -1,6 +1,6 @@
 import '../vendor/browser-polyfill.js';
 import '../vendor/dexie.js'; // Assumes dexie.js supports default export or is bundled
-import { getAnkiVersion, addAnkiNote, findNote } from '../shared/anki.js';
+import { getAnkiVersion, addAnkiNote, findNote, getDecks } from '../shared/anki.js';
 
 console.log('BACKGROUND SERVICE IS RUNNING');
 
@@ -161,7 +161,7 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
     }   else if (message.action === "ankiStatus") {
             getAnkiVersion()
             .then(res=> sendResponse({success: true, data: res}))
-            .catch(err=> sendResponse({success: false, error: error.message || err}));
+            .catch(err=> sendResponse({success: false, error: err?.message || err}));
             
             return true; // keep channel open for async response
 

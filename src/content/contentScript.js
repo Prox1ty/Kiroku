@@ -236,7 +236,6 @@ async function triggerPopup(selectedText) {
                 <div class="syn-container">${synHtml}</div>
                 <ul class="def-list">${defHtml}</ul>
                 <div class="extra-def-btn">▶ Extra Definitions</div>
-                </ul>
                 <ul class="extra-def-ul visible"></ul>
             </div>
         `;    

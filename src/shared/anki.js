@@ -26,11 +26,13 @@ async function ankiConnectInvoke(action, version, params={}) {
 
 async function getDecks() {
     try {
-    const result = await ankiConnectInvoke('deckNames', 5);
-    console.log("got list of decks", result); // json object
+        const result = await ankiConnectInvoke('deckNames', 5);
+        console.log("got list of decks", result); // json object
+        return result;
 
     } catch (e) {
         console.error(`error getting decks ${e}`);
+        return [];
     }
 }
 
@@ -113,7 +115,10 @@ async function getAnkiVersion() {
 async function findNote(id) {
     try {
         const { selectedDeck } = await browser.storage.local.get('selectedDeck');
-        const query = selectedDeck ? `deck:${selectedDeck} ${id}` : `${id}`;
+        const escapedDeckName = selectedDeck
+            ? selectedDeck.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+            : '';
+        const query = selectedDeck ? `deck:"${escapedDeckName}" ${id}` : `${id}`;
         const response = await ankiConnectInvoke('findCards', 6, { query });
 
         return Array.isArray(response) ? response : [];
@@ -124,4 +129,4 @@ async function findNote(id) {
     }
 }
 
-export { getAnkiVersion, addAnkiNote, findNote };
+export { getAnkiVersion, addAnkiNote, findNote, getDecks };
