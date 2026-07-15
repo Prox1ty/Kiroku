@@ -42,12 +42,7 @@ This project keeps the core idea of fast popup lookups and adapts it into a smal
 3. Open the extension options page and choose your deck, note type, and field mappings.
 4. Select a word on a page and press `Ctrl` / `Cmd` to open the lookup popup.
 
-```html
-<video controls width="100%">
-	<source src="assets/demovideo.mp4" type="video/mp4">
-	Your browser does not support the video tag.
-</video>
-```
+## Demo Video
 
 ## Notes
 
