@@ -2,12 +2,60 @@
 <html>
 <head>
   <style>
-    body { width: 200px; padding: 10px; font-family: sans-serif; }
-    button { width: 100%; padding: 8px; cursor: pointer; }
+    body { 
+      width: 240px; /* Slightly wider for better text and button layouts */
+      padding: 16px; 
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background-color: #1e1e2e; /* Slate panel card surface */
+      color: #cdd6f4;
+    }
+
+    .popup-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #cba6f7; /* Kiroku Violet Theme Accent */
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button { 
+      width: 100%; 
+      padding: 10px 14px; 
+      background-color: #313244; /* Dark button background */
+      color: #cdd6f4;
+      border: 1px solid #45475a;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: #45475a;
+      border-color: #cba6f7; /* Highlights border on hover */
+    }
+
+    button:active {
+      transform: scale(0.98); /* Tactile press feedback */
+    }
   </style>
 </head>
 <body>
-  <h3>Anki Tool</h3>
+  <h3>Kiroku Tool</h3>
   <button id="openSettings">Settings</button>
   <script src="/src/vendor/browser-polyfill.js"></script>
   <script src="/popup/popup.js"></script>
