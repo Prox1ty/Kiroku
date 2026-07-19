@@ -48,11 +48,13 @@ Kiroku needs to know if your Anki is open or not. For that you need to install t
 After you've done that go ahead and import the apkg file included in the assets folder of the extension. In it is an example word deck which you can delete after importing (or keep. Up to you really). The purpose of the deck is to install my custom made note type for this extension. You can also use your own note types but make sure to include an id field else the add button and lookup button feature won't work.
 
 Now open Anki and then click on the extension icon in your extension toolbar and navigate to settings.
-<img width="468" height="289" alt="image" src="https://github.com/user-attachments/assets/69491070-37a1-4ce0-a8a6-4108d408e76b" />
+<img width="634" height="247" alt="image" src="https://github.com/user-attachments/assets/d70455ed-215e-4226-b84d-87bc2948bf79" />
+
 
 After that, select the deck you wish to add the cards to and select either the English Mining Note notetype or your custom note type (again make sure you have an id field), fill the fields with your preferred values and hit save.
 
-<img width="2590" height="1285" alt="image" src="https://github.com/user-attachments/assets/1edafe37-d261-470c-9ad5-06da79dcc7dd" />
+<img width="938" height="1415" alt="image" src="https://github.com/user-attachments/assets/006c8ce0-54a7-487a-996b-6849dcecb726" />
+
 
 ### You're done!
 
