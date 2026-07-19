@@ -158,7 +158,7 @@ async function triggerPopup(selectedText) {
 
     if (ankiNoteButton) {
         const addNoteBtnHTML = `<button class="addNoteBtn"> + </button>`
-        const ankiLookupBtnHTML = `<button id="lookUpBtn"> ? </button>`
+        const ankiLookupBtnHTML = `<button class="lookUpBtn" id="lookUpBtn"> ? </button>`
 
         ankiButtons.push(ankiLookupBtnHTML);
         ankiButtons.push(addNoteBtnHTML);
@@ -275,6 +275,7 @@ function positionPopup(popupElement) {
 
 function attachAnkiButtonListeners() {
     const buttons = document.querySelectorAll('.addNoteBtn');
+    const lookUpBtn = document.querySelectorAll('.lookUpBtn');
     buttons.forEach(button => {
         button.addEventListener('click', async(event) => {
             const parentContainer = event.target.closest('.ankiBtnDiv');
@@ -284,6 +285,17 @@ function attachAnkiButtonListeners() {
                 const entryData = activePopupEntries[entryId];
                 console.log(entryData.sentence);
                 addNote(entryData, event.target);
+            }
+        })
+    })
+    lookUpBtn.forEach(button => {
+        button.addEventListener('click', async(event) => {
+            const parentContainer = event.target.closest('.ankiBtnDiv');
+            const entryId = parentContainer ? parentContainer.dataset.id : null;
+
+            if (entryId) {
+                console.log("Got entry id in Lookup buttton listener: ", entryId);
+                lookupNote(entryId);
             }
         })
     })
@@ -315,7 +327,7 @@ async function addNote(expressionObject, addNoteBtn) {
         const response = await checkAnkiConnectivity();
         if (typeof response == "number") {
             // send a message
-            const msgResponse = await browser.runtime.sendMessage({ action: "addNote", version: 5, params: expressionObject })
+            const msgResponse = await browser.runtime.sendMessage({ action: "addNote", version: 6, params: expressionObject })
 
             if (msgResponse.duplicate) {
                 addNoteBtn.classList.add('duplicate');
@@ -335,5 +347,21 @@ async function addNote(expressionObject, addNoteBtn) {
         console.error("Failed to add card to anki: ", err);
     } finally {
         addNoteBtn.classList.remove('gray-out');
+    }
+}
+
+async function lookupNote(entryId) {
+    try {
+        // Broadcast the action to the background script
+        const response = await browser.runtime.sendMessage({
+            action: "lookupNote",
+            params: { id: entryId }
+        });
+        
+        if (response && !response.success) {
+            console.error("AnkiConnect guiBrowse failed:", response.error);
+        }
+    } catch (error) {
+        console.error("Failed to communicate with background script during lookup:", error);
     }
 }
