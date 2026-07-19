@@ -21,6 +21,8 @@
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* no h-offset, 10px v-offset, 25px blur */
     padding: 16px;
+    min-width: 100px;
+    min-height: 150px;
     width: 350px;
     max-height: 300px;
     overflow-y: auto; /* scroll basically */
