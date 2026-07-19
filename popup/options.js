@@ -90,7 +90,7 @@ async function loadNoteTypes() {
         }
 
         // will fetch selectedModel from localStorage. 
-        await getFields();
+        await getFields(select.value);
 
         select.addEventListener('change', async () => {
             await getFields(select.value);
@@ -106,12 +106,12 @@ async function loadNoteTypes() {
 async function getFields(selectedModel) {
     // this is triggered after note type selection.
     const storageMappings = await browser.storage.local.get('allMappings');
-    const allMappings = storageMappings.allMappings;
+    const allMappings = storageMappings.allMappings || {};
 
-    let modelName = selectedModel ? selectedModel : ""
+    let modelName = selectedModel ? selectedModel : "";
     if (!modelName) {
         const storageResponse = await browser.storage.local.get('selectedModel');
-        modelName = storageResponse.selectedModel;
+        modelName = storageResponse.selectedModel || document.getElementById('noteType').value || "Basic";
     }
     try {
         const response = await fetch('http://127.0.0.1:8765', {
@@ -126,7 +126,7 @@ async function getFields(selectedModel) {
         });
 
         const data = await response.json();
-        const fields = data.result; // can confirm the format on ankiConnect's github
+        const fields = data.result || []; // can confirm the format on ankiConnect's github
 
         const fieldsDiv = document.getElementById('fieldsDiv');
         if (fieldsDiv) fieldsDiv.innerHTML = "";

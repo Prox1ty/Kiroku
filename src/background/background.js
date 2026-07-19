@@ -11,14 +11,15 @@ db.version(1).stores({
 });
 
 
-browser.runtime.onInstalled.addListener((details) => {
+browser.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === "install") {
         console.log("Extension installed successfully. Starting one-time seeding...");
-        (async () => {
+        try{
             await db.open();
-        })();
-
-        return seedDictionary();
+            await seedDictionary();
+        } catch(err) {
+            console.error("Database initialization failed:", err);
+        }
     } else if (details.reason === "update") {
         console.log("Extension updated. Check if DB schema needs refresh.");
         // will add later
@@ -62,12 +63,15 @@ async function seedDictionary() {
 
 }
 
+// dictionary parser also integrated in here
+
 async function fillDB(fileURL, db, typeWord) {
     try {
         const response = await fetch(browser.runtime.getURL(fileURL)); // fetching directly
         if (!response.ok) {
             // handle errors
             console.error(`Error occured while trying to read ${typeWord} file`);
+            return;
         }
         const textRes = (await response.text()).split('\n');
         const batchSize = 2000;
@@ -84,7 +88,21 @@ async function fillDB(fileURL, db, typeWord) {
             if (!parts[1]) continue;
             const def = parts[1];
 
-            const Word = line[4]
+            // parse word count from hex
+            const wCnt = parseInt(line[3], 16);
+            const wordsInSynset = [];
+            // collect the words
+            for (let i = 0; i <wCnt; i++) {
+                const wordIdx = 4 + (i * 2); // skipping the lexid in between
+                const rawWord = line[wordIdx];
+                if (rawWord) {
+                    let cleanWord = rawWord.replace(/_/g, ' ').toLowerCase();
+                    cleanWord = cleanWord.replace(/\([a-z]\)$/, ''); // strip trailing markers like (a)
+                    wordsInSynset.push(cleanWord);
+                }
+            }
+
+
             const synonyms = [];
             const defArr = [];
             const sentenceArr = [];
@@ -93,8 +111,8 @@ async function fillDB(fileURL, db, typeWord) {
             if (def.includes(';')) {
                 for (let part of def.split(';')) {
                     part = part.trim();
-                    if (part.startsWith('"')) {
-                        sentenceArr.push(part);
+                    if (part.startsWith('"') || part.startsWith("'")) {
+                        sentenceArr.push(part.replace(/^["']|["']$/g, ''));
                     } else {
                         defArr.push(part);
                     }
@@ -103,23 +121,22 @@ async function fillDB(fileURL, db, typeWord) {
                 defArr.push(def);
             }
 
-            // checking if index 6 contains a synonym.
-
-            if (isNaN(line[6])) {
-                synonyms.push(line[6]);
-                synonyms.push(line[8]);
+            // create independent database record for every word in the current synset
+            for (const currentWord of wordsInSynset) {
+                // words in the same row are considered as synonyms
+                const synonyms = wordsInSynset.filter(w => w !== currentWord);
+                // pushing in batch
+                batch.push({
+                    word: currentWord,
+                    type: typeWord,
+                    definition: defArr,
+                    synonym: synonyms,
+                    sentence: sentenceArr.length > 0 ? sentenceArr : "No example sentence"
+                });
             }
 
-            batch.push({
-                word: Word ? Word.toLowerCase() : "unknown",
-                type: typeWord,
-                definition: defArr,
-                synonym: synonyms,
-                sentence: sentenceArr.length > 0 ? sentenceArr : "No example sentence"
-            });
             // will add sentence later        
             if (batch.length >= batchSize) {
-                // transaction (i have no idea what this is)
                 await db.transaction('rw', db.dictionary, async () => {
                     await db.dictionary.bulkPut(batch).catch(err => {
                         console.error("bulkput failed", err);
