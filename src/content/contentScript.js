@@ -202,7 +202,6 @@ async function triggerPopup(selectedText) {
         let ankiDef = entry.definition.map((d) => {
             return `<span class="definition">${d}</span>`
         }).join(""); // custom for my note type
-        console.log(entry.sentence);
         let ankiSentence = Array.isArray(entry.sentence) ? (entry.sentence.map((s) => {
                 return `<span class="sentence">"${s}"</span>`;
             }).join("")
@@ -294,7 +293,6 @@ function attachAnkiButtonListeners() {
             const entryId = parentContainer ? parentContainer.dataset.id : null;
 
             if (entryId) {
-                console.log("Got entry id in Lookup buttton listener: ", entryId);
                 lookupNote(entryId);
             }
         })
