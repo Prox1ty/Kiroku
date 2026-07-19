@@ -45,7 +45,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
     width: 50%;
 }
@@ -160,6 +159,7 @@
     align-items: center;
     width:100%;
     box-sizing: border-box;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .gray-out {
@@ -186,4 +186,13 @@
     letter-spacing: 0.2px;
     z-index: 2;
     pointer-events: none;
+}
+
+.lookUpBtn {
+    border-radius: 20px;
+    color: white;
+    background-color: #a78bfa;
+    padding: 2px;
+    font-size: 15px;
+    box-shadow: #a78bfa 5px;
 }

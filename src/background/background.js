@@ -1,6 +1,6 @@
 import '../vendor/browser-polyfill.js';
 import '../vendor/dexie.js'; // Assumes dexie.js supports default export or is bundled
-import { getAnkiVersion, addAnkiNote, findNote, getDecks } from '../shared/anki.js';
+import { getAnkiVersion, addAnkiNote, findNote, getDecks, lookupInvoke } from '../shared/anki.js';
 
 console.log('BACKGROUND SERVICE IS RUNNING');
 
@@ -204,7 +204,13 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => { // middle 
                 console.log("Error querying anki for existing/non-existing word");
                 return sendResponse({ success: false, data: null, duplicate: false })
             })
-    }   
+    }   else if (message.action === "lookupNote") {
+        lookupInvoke(message.params.id)
+        .then((response) => sendResponse(response))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+
+        return true;
+    }
             
         return true;
 });

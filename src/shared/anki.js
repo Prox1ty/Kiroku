@@ -129,4 +129,26 @@ async function findNote(id) {
     }
 }
 
-export { getAnkiVersion, addAnkiNote, findNote, getDecks };
+async function lookupInvoke(id) {
+    try {
+        if (!id) {
+            throw new Error("Cannot look up note: Missing or invalid note ID identifier.");
+        }
+
+        // Build the target search query. 
+        // If your Anki cards map 'id' into a specific field, use: "id:" + id
+        const searchQuery = `id:${id}`; 
+
+        const result = await ankiConnectInvoke('guiBrowse', 6, {
+            query: searchQuery
+        });
+
+        return { success: true, data: result };
+    } catch (error) {
+        console.error("Error inside lookupInvoke execution stream:", error);
+        return { success: false, error: error?.message || error };
+    }
+}
+
+
+export { getAnkiVersion, addAnkiNote, findNote, getDecks, lookupInvoke };
