@@ -32,7 +32,7 @@
     },
     "action": {
         "default_popup": "popup/popup.html",
-        "default_icon": "popup/popupicon.png"
+        "default_icon": "popup/kirokulogo.png"
     },
     "options_page": "popup/options.html"
     
