@@ -1,5 +1,83 @@
 import { getAnkiVersion } from "../src/shared/anki.js";
 
+async function showStatus(message) {
+    const banner = document.getElementById('db-status-banner');
+    const text = document.getElementById('db-status-banner-text');
+    if (banner && text) {
+        banner.style.display = 'flex';
+        text.textContent = message;
+    }
+}   
+
+// check if this is a fresh installation context
+(async () => {
+    const data = await browser.storage.local.get("FIRST_INSTALL");
+    const isFirstInstall = data.FIRST_INSTALL;
+
+    if (isFirstInstall) {
+        // Create the notification window container
+        let firstInstallWindow = document.createElement('div');
+        firstInstallWindow.id = 'kiroku-install-notifier';
+        
+        firstInstallWindow.innerHTML = `
+            <div class="kiroku-install-content">
+                <div class="kiroku-install-header">
+                    <span class="kiroku-title">🌸 Kiroku Dictionary</span>
+                    <button id="kiroku-close-install-btn">&times;</button>
+                </div>
+                <div class="kiroku-install-body">
+                    <div class="kiroku-spinner"></div>
+                    <p>Initializing local WordNet dictionary data. Please wait while the database is seeding...</p>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(firstInstallWindow);
+
+        // Close button handler (manual dismissal)
+        const closeBtn = firstInstallWindow.querySelector('#kiroku-close-install-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                firstInstallWindow.remove();
+            });
+        }
+
+        browser.runtime.onMessage.addListener((message) => {
+            if (message.action === "seedingComplete") {
+                const bodyText = firstInstallWindow.querySelector('.kiroku-install-body p');
+                const spinner = firstInstallWindow.querySelector('.kiroku-spinner');
+                
+                if (bodyText) {
+                    bodyText.textContent = "Database seeded successfully! Press Ctrl/Cmd to look up words.";
+                }
+                if (spinner) {
+                    spinner.style.display = 'none';
+                }
+                
+                // Auto-dismiss the notification 4 seconds after completion
+                setTimeout(() => {
+                    if (document.getElementById('kiroku-install-notifier')) {
+                        firstInstallWindow.remove();
+                    }
+                }, 4000);
+            }
+        });
+    }
+})();
+
+
+browser.storage.local.get("FIRST_INSTALL").then((data) => {
+    if (data.FIRST_INSTALL) {
+        showStatus("Initializing dictionary database... please hold on.");
+    }
+});
+
+browser.runtime.onMessage.addListener((message) => {
+    if (message.action === "seedingComplete") {
+        showStatus("Database ready to roll!");
+    }
+});
+
 const saveBtn = document.getElementById('saveBtn');
 saveBtn.disabled = false;
 
@@ -154,8 +232,9 @@ async function getFields(selectedModel) {
                 fieldsDiv.appendChild(label);
                 fieldsDiv.appendChild(select);
             }
-            
-            const currMapping = allMappings[f] ? allMappings[f] : "Word";
+            const fallbackDefault = f.toLowerCase() == 'id' ? 'Id' : 
+            allOptions.map(o => o.toLowerCase()).includes(f.toLowerCase()) ? f : "Word";
+            const currMapping = allMappings[f] ? allMappings[f] : fallbackDefault;
             select.value = currMapping;
         })
 

@@ -250,26 +250,28 @@ function triggerPopupWithoutRefreshing() {
 
 function positionPopup(popupElement) {
     const selection = window.getSelection();    
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
+    if (!selection || selection.rangeCount === 0) return;
 
-        // 10 pixels below the selected text
-        let top = rect.bottom + window.scrollY + 10; // accounting for scroll positions as well
-        let left = rect.left + window.scrollX;  
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    
+    // 10 pixels below the selected text
+    let top = rect.bottom + window.scrollY; // accounting for scroll positions as well
+    let left = rect.left + window.scrollX;  
 
-        if (left + 350 > window.innerWidth) // popup width is 350px
-        {
-            left = window.innerWidth - 400;
-        }
-        if (top + 400 > window.innerHeight) {
-            top = window.innerHeight - 350;
-        } 
-
-        popupElement.style.top = `${top}px`;
-        popupElement.style.left = `${left}px`;
-
+    if (left + 350 > window.innerWidth) // popup width is 350px
+    {
+        left = window.innerWidth - 400;
     }
+    if (top + 400 > window.innerHeight) {
+        top = window.innerHeight - 350;
+    } 
+
+    popupElement.style.position = 'absolute';
+    popupElement.style.top = `${top + 8}px`;
+    popupElement.style.left = `${left}px`;
+
+
 }
 
 function attachAnkiButtonListeners() {

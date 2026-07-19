@@ -14,9 +14,17 @@ db.version(1).stores({
 browser.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === "install") {
         console.log("Extension installed successfully. Starting one-time seeding...");
-        try{
+        // set storage flag so contentScript knows it's a fresh install.
+        await browser.storage.local.set({"FIRST_INSTALL": true});
+        browser.tabs.create({ url: "popup/options.html" });
+        try {
             await db.open();
             await seedDictionary();
+
+            // seeding complete
+            await browser.storage.local.set({ FIRST_INSTALL: false });
+
+            browser.runtime.sendMessage({ action: "seedingComplete" }).catch(() => {});
         } catch(err) {
             console.error("Database initialization failed:", err);
         }
