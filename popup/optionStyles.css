@@ -1,0 +1,251 @@
+/* first install window styles */
+/* Optimized first install window styles */
+#kiroku-install-notifier {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 340px; /* Slightly wider to let the typography breathe */
+    background-color: #1e1e2e; 
+    color: #cdd6f4;
+    border: 1px solid #cba6f7; 
+    border-radius: 10px; /* Slightly smoother corners */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); /* Deepened shadow for separation from host page */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    z-index: 9999999; 
+    animation: kirokuSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* Smoother entrance curve */
+}
+
+.kiroku-install-content {
+    padding: 16px;
+}
+
+.kiroku-install-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Keeps single-line or clean layout vertically centered */
+    border-bottom: 1px solid #313244;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    gap: 12px; /* Guarantees the text never collides with the close cross */
+}
+
+.kiroku-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #cba6f7;
+    white-space: nowrap; /* 💡 FIX: Prevents "Dictionary" from wrapping onto a second line */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#kiroku-close-install-btn {
+    background: none;
+    border: none;
+    color: #a6adc8;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    margin-top: -2px; /* Subtle optical balance alignment correction */
+    border-radius: 4px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+#kiroku-close-install-btn:hover {
+    color: #f38ba8; 
+    background-color: rgba(243, 139, 168, 0.1); /* Subtle glowing hover frame behind cross */
+}
+
+.kiroku-install-body {
+    display: flex;
+    align-items: flex-start; /* 💡 FIX: Aligns spinner cleanly with the top of multi-line sentences */
+    gap: 14px;
+}
+
+.kiroku-install-body p {
+    margin: 0;
+    font-size: 13px; /* Slightly more readable */
+    line-height: 1.5;
+    color: #bac2de; /* Boosted contrast */
+}
+
+/* CSS Loading Spinner */
+.kiroku-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #313244;
+    border-top: 2.5px solid #cba6f7;
+    border-radius: 50%;
+    animation: kirokuSpin 0.8s linear infinite; /* Snappier rotation */
+    flex-shrink: 0;
+    margin-top: 2px; /* Aligns visually with the first line of descriptive copy */
+}
+
+@keyframes kirokuSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes kirokuSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* options page styles */
+body {
+    background-color: #11111b; /* Deep rich canvas base */
+    color: #cdd6f4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 40px 20px;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Master Configuration Card Container */
+.card {
+    background: #1e1e2e; /* Slate panel card surface */
+    width: 100%;
+    max-width: 520px;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid #313244;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #cba6f7; /* Vibrant Violet Accent Header */
+    margin-top: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #313244;
+    padding-bottom: 12px;
+}
+
+/* Form Formatting Layouts */
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #a6adc8;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Custom Select Dropdowns styling */
+select {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    background-color: #181825;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    margin-bottom: 4px;
+}
+
+select:focus {
+    border-color: #cba6f7;
+    box-shadow: 0 0 0 2px rgba(203, 166, 247, 0.2);
+}
+
+select:disabled {
+    background-color: #11111b;
+    color: #585b70;
+    cursor: not-allowed;
+    border-color: #313244;
+}
+
+/* Dynamic Fields Mapping Boundary Zone */
+#fieldsDiv {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px dashed #313244;
+}
+
+#fieldsDiv label {
+    color: #bac2de;
+    font-size: 12px;
+}
+
+/* Primary Action Buttons */
+button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #cba6f7;
+    color: #11111b;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 28px;
+    transition: background-color 0.2s, transform 0.1s, opacity 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background-color: #b4befe; /* Transitions slightly to soft blue */
+}
+
+button:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+button:disabled {
+    background-color: #313244;
+    color: #7f849c;
+    cursor: not-allowed;
+}
+
+/* Database Seeding Status Strip indicator */
+#db-status-banner {
+    position: relative;
+    background-color: #25253a;
+    border: 1px solid #45475a;
+    padding: 10px 14px;
+    border-radius: 6px 0px 0px 6px;
+    font-size: 13px;
+    color: #fab387; /* Soft orange/peach attention tracker text */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: -1;
+    left: 20px;
+}
+
+#db-status-banner-text {
+    max-width: 110px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px;
+}
+
+/* Re-use/align the absolute-positioned installation window styling inside the file namespace */
+#kiroku-install-notifier {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: 1px solid #cba6f7;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 9999999;
+}
