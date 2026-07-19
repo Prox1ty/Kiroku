@@ -1,6 +1,6 @@
-# Yomitan Replica
+# Kiroku
 
-Yomitan Replica is a browser extension for quick word lookup and Anki note creation.
+Kiroku is a browser extension for quick word lookup and Anki note creation.
 It was inspired by [Yomitan](https://github.com/yomidevs/yomitan), a popular browser-based dictionary extension used for language learning.
 
 This project keeps the core idea of fast popup lookups and adapts it into a smaller custom extension with local dictionary data and Anki integration.
